@@ -29,7 +29,8 @@ class Monster extends FlxSpriteGroup
 		width = _graphic.width;
 		height = _graphic.height;
 
-		_healthBar = new FlxBar( - width / 2, 0, FlxBar.FILL_LEFT_TO_RIGHT, Std.int(width * 2), 2, this, "health", 0, maxHealth);
+		var barWidth : Int = Std.int((maxHealth / 100) * width);
+		_healthBar = new FlxBar( _graphic.width / 2 - barWidth, 0, FlxBar.FILL_LEFT_TO_RIGHT, barWidth * 2, 2, this, "health", 0, maxHealth);
 		_healthBar.createFilledBar(0xFFFF0000, 0xFF00FF00);
 		add(_healthBar);
 		_healthBar.currentValue = maxHealth;

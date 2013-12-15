@@ -61,6 +61,8 @@ class PlayState extends FlxState
 		
 		super.create();
 		
+		Reg.emmiters = new FlxGroup();
+		
 		_mousePointer = new FlxSprite(0, 0, null);
 		_mousePointer.makeGraphic(3, 3, 0x0);
 		FlxSpriteUtil.drawCircle(_mousePointer, 1, 1, 1, 0xFFFF0000);

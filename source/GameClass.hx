@@ -3,6 +3,7 @@ package;
 import flash.Lib;
 import flixel.FlxGame;
 import states.PlayState;
+import states.EndState;
 
 class GameClass extends FlxGame
 {	
