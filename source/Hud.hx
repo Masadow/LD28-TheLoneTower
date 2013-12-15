@@ -16,10 +16,12 @@ class Hud extends FlxSpriteGroup
 	public var money(default, set) : Int;
 	public var score(default, set) : Int;
 	public var nextLevel(default, set) : Int;
+	public var upgrade(default, set) : Int;
 	
 	private var _score: FlxText;
 	private var _money: FlxText;
 	private var _nextLevel: FlxText;
+	private var _upgrade: FlxText;
 
 	private function set_score(Score : Int) : Int {
 		score = Score;
@@ -40,6 +42,13 @@ class Hud extends FlxSpriteGroup
 		return nextLevel;
 	}
 
+	private function set_upgrade(Upgrade : Int) : Int
+	{
+		upgrade = Upgrade;
+		_upgrade.text = "Upgrade points: " + upgrade;
+		return upgrade;
+	}
+
 	public function new() 
 	{
 		super(0, 0);
@@ -58,11 +67,15 @@ class Hud extends FlxSpriteGroup
 		_nextLevel = new FlxText(160, 0, 80);
 		_nextLevel.scrollFactor.set(0, 0);
 		add(_nextLevel);
+		_upgrade = new FlxText(240, 0, 80);
+		_upgrade.scrollFactor.set(0, 0);
+		add(_upgrade);
 		
-		var txt = new FlxText(240, 0, 80, "STOP music with M");
+		var txt = new FlxText(320, 0, 80, "STOP music with M");
 		add(txt);		
 		
 		money = 1000;
 		score = 0;
+		upgrade = 0;
 	}
 }

@@ -11,6 +11,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
 import flixel.FlxObject;
 import flixel.util.FlxPath;
+import monster.Monster;
 import monster.MonsterGroup;
 import openfl.Assets;
 import flixel.util.FlxPoint;
@@ -116,20 +117,59 @@ class PlayState extends FlxState
 
 		var tile = _tilemap.getTile(Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
 		
-		if (FlxG.mouse.justPressed && _price.value <= _hud.money && tile == 0)
+		if (FlxG.mouse.justPressed)
 		{
-			FlxG.sound.play("sounds/move.wav");
-			_hud.money -= _price.value;
-			_tower.x = FlxG.mouse.x - FlxG.mouse.x % 16;
-			_tower.y = FlxG.mouse.y - FlxG.mouse.y % 16;
+			if (_price.value <= _hud.money && tile == 0)
+			{
+				FlxG.sound.play("sounds/move.wav");
+				_hud.money -= _price.value;
+				_tower.x = FlxG.mouse.x - FlxG.mouse.x % 16;
+				_tower.y = FlxG.mouse.y - FlxG.mouse.y % 16;
+			}
+			else
+			{
+				var monster : Monster = null;
+				//Enable killing monsters with mouse
+				//for (m in _monsters.iteratorAlive())
+				//{
+					//if ((cast m).overlapsPoint(FlxG.mouse.getWorldPosition()))
+					//{
+						//monster = cast m;
+						//break ;
+					//}
+				//}
+				if (monster == null)
+					FlxG.sound.play("sounds/error.wav");
+				else {
+					FlxG.sound.play("sounds/shoot.wav");
+					monster.hurt(5);
+					if (!monster.alive) {
+						FlxG.sound.play("sounds/dead.wav");
+						_hud.score += monster.reward;
+						_hud.money += monster.reward;
+					}
+				}
+			}
 		}
-		else if (FlxG.mouse.justPressed)
-			FlxG.sound.play("sounds/error.wav");
 
 		//Every level up, increase range by one
 		if (levelup()) {
-			FlxG.sound.play("sounds/levelup.wav");			
-			_tower.range++;
+			FlxG.sound.play("sounds/levelup.wav");
+			_hud.upgrade++;
+			_tower.level++;
+		}
+		
+		if (_hud.upgrade > 0)
+		{
+			if (FlxG.keys.justPressed.Q)
+				_tower.range++;
+			else if (FlxG.keys.justPressed.W)
+				_tower.firerate *= 0.9;
+			else if (FlxG.keys.justPressed.E)
+				_tower.power += 4;
+			else
+				_hud.upgrade++;
+			_hud.upgrade--;
 		}
 		
 		//check if a monster has reach the opposite side
@@ -153,7 +193,7 @@ class PlayState extends FlxState
 		// f(2) = 0
 		// f(3) = 200
 		// f(10) = 10000
-		_hud.nextLevel = Std.int(150 * Math.pow(_tower.range + 1, 2) - 550 * (_tower.range + 1) + 500) - _hud.score;
+		_hud.nextLevel = Std.int(150 * Math.pow(_tower.level + 1, 2) - 550 * (_tower.range + 1) + 500) - _hud.score;
 		return _hud.nextLevel <= 0;
 	}
 	

@@ -49,6 +49,5 @@ class Monster extends FlxSpriteGroup
 		health = maxHealth;
 		alive = true;
 		revive();
-	}
-	
+	}	
 }
