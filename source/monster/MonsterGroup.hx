@@ -95,6 +95,8 @@ class MonsterGroup extends FlxGroup
 					//path.run(monster, points, 100, 0, true);
 				}
 				
+				monster.balanceLife(_hud.score);
+				
 				add(monster);
 			}
 		}

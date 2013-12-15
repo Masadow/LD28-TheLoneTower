@@ -4,6 +4,7 @@ import flash.Lib;
 import flixel.FlxGame;
 import states.PlayState;
 import states.EndState;
+import states.PreState;
 
 class GameClass extends FlxGame
 {	
@@ -18,6 +19,6 @@ class GameClass extends FlxGame
 		
 		var fps:Int = 60;
 		
-		super(Math.ceil(stageWidth / ratio), Math.ceil(stageHeight / ratio), PlayState, ratio, fps, fps);
+		super(Math.ceil(stageWidth / ratio), Math.ceil(stageHeight / ratio), PreState, ratio, fps, fps);
 	}
 }

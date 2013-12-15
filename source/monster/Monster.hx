@@ -18,6 +18,7 @@ class Monster extends FlxSpriteGroup
 	private var _graphic : FlxSprite;
 	private var _healthBar : FlxBar;
 	private var _emitter : FlxEmitter;
+	private var _barWidth : Int;
 
 	private function new(Asset : String)
 	{
@@ -29,11 +30,7 @@ class Monster extends FlxSpriteGroup
 		width = _graphic.width;
 		height = _graphic.height;
 
-		var barWidth : Int = Std.int((maxHealth / 100) * width);
-		_healthBar = new FlxBar( _graphic.width / 2 - barWidth, 0, FlxBar.FILL_LEFT_TO_RIGHT, barWidth * 2, 2, this, "health", 0, maxHealth);
-		_healthBar.createFilledBar(0xFFFF0000, 0xFF00FF00);
-		add(_healthBar);
-		_healthBar.currentValue = maxHealth;
+		_barWidth = Std.int((maxHealth / 100) * width);
 
 		//Explode effect
 		_emitter = new FlxEmitter();
@@ -64,6 +61,17 @@ class Monster extends FlxSpriteGroup
 
 		_emitter.at(_graphic);
 		_emitter.start(true, 1, 0, 0, 1);
+	}
+	
+	public function balanceLife(Score : Int):Void
+	{
+		maxHealth += Std.int(Score / 200);
+		health = maxHealth;
+		remove(_healthBar);
+		_healthBar = new FlxBar( _graphic.width / 2 - _barWidth, 0, FlxBar.FILL_LEFT_TO_RIGHT, _barWidth * 2, 2, this, "health", 0, maxHealth);
+		_healthBar.createFilledBar(0xFFFF0000, 0xFF00FF00);
+		add(_healthBar);
+		_healthBar.currentValue = maxHealth;
 	}
 	
 	override public function reset(X:Float, Y:Float):Void 

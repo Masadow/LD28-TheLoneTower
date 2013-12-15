@@ -1,5 +1,6 @@
 package character;
 
+import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
@@ -90,7 +91,19 @@ class Character extends FlxSpriteGroup
 		
 		_rangeCircle.x = x - _rangeCircle.range * 16;
 		_rangeCircle.y = y - _rangeCircle.range * 16;
-
+		
+		//Remove dead missiles
+		var removeList: List<FlxBasic> = new List<FlxBasic>();
+		for (dead in Reg.emmiters.iteratorDead)
+		{
+			if (Std.is(dead, Missile))
+				removeList.push(dead);
+		}
+		for (missile in removeList)
+		{
+			Reg.emmiters.remove(missile);
+		}
+		
 		var maxTarget = target;
 		_lastShot += FlxG.elapsed;
 		//Check if we should shoot
@@ -114,6 +127,9 @@ class Character extends FlxSpriteGroup
 					var monmidb : Float = Math.sqrt(monmid.x * monmid.x + monmid.y * monmid.y);
 					_canon.set_angle(Math.acos((topmid.x * monmid.x + topmid.y * monmid.y) / (topmidb * monmidb)));
 
+					//Fire a missile
+					Reg.emmiters.add(new Missile(x + 8, y + 8, monster.getMidpoint())); 
+					
 					FlxG.sound.play("sounds/shoot.wav");
 					monster.hurt(power);
 					if (!monster.alive) {
