@@ -15,7 +15,7 @@
 -D web
 --no-output
 -swf-version 11.2
--swf export/flash/bin/isoXelDemo.swf
+-swf export/flash/bin/lonetower.swf
 -swf-header 608:576:60:FFFFFF
 -cp export/flash/haxe
 #--remap nme:flash

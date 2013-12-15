@@ -9,9 +9,9 @@ class Monster1 extends Monster
 
 	public function new() 
 	{		
-		maxHealth = 50;
+		maxHealth = 20;
 		reward = 30;
-		speed = 20;
+		speed = 150;
 
 		super("images/monster1.png");
 		

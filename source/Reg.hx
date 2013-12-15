@@ -1,5 +1,7 @@
 package;
 
+import flixel.FlxG;
+import flixel.group.FlxGroup;
 import flixel.util.FlxSave;
 
 /**
@@ -40,4 +42,6 @@ class Reg
 	 * your state if you want to use the same save flixel uses internally
 	 */
 	static public var save:FlxSave;
+	
+	static public var emmiters:FlxGroup = new FlxGroup();
 }

@@ -20,7 +20,7 @@ class Price extends FlxText
 	private function set_value(Value : Int) : Int
 	{
 		value = Value;
-		text = "-" + value;
+		text = "-" + value + "$";
 		return value;
 	}
 	

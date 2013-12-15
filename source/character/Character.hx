@@ -20,16 +20,29 @@ class Character extends FlxSpriteGroup
 	private var _canon : FlxSprite;
 	private var _rangeCircle : RangeCircle;
 	
-	public var firerate : Float;
-	public var power : Int;
+	public var firerate(default, set) : Float;
+	public var power(default, set) : Int;
+	public var target(default, set) : Int;
 	
+	private function set_firerate(Firerate : Float) : Float
+	{
+		return firerate = _hud.firerate = Firerate;
+	}
+	private function set_power(Power : Int) : Int
+	{
+		return power = _hud.power = Power;
+	}
+	private function set_target(Target : Int) : Int
+	{
+		return target = _hud.target = Target;
+	}
+
 	public var level : Int;
 
 	private var _lastShot : Float;
 
 	private var _monsters : MonsterGroup;
 	private var _hud : Hud;
-//	private var _
 
 	public var range(get, set) : Int;
 	private function get_range() : Int
@@ -68,6 +81,7 @@ class Character extends FlxSpriteGroup
 		power = 20;
 		firerate = 0.5; //Second between shots
 		_lastShot = 0;
+		target = 1;
 	}
 	
 	override  function update():Void 
@@ -77,12 +91,13 @@ class Character extends FlxSpriteGroup
 		_rangeCircle.x = x - _rangeCircle.range * 16;
 		_rangeCircle.y = y - _rangeCircle.range * 16;
 
+		var maxTarget = target;
 		_lastShot += FlxG.elapsed;
 		//Check if we should shoot
 		if (_lastShot > firerate)
 		{
 			//Check if there is a monster in range
-			for (monsterBasic in _monsters.iteratorAlive())
+			for (monsterBasic in _monsters.iteratorAlive)
 			{
 				var monster : Monster = cast monsterBasic;
 				var midMonster : FlxPoint = new FlxPoint(monster.x + 8, monster.y + 8);
@@ -108,7 +123,8 @@ class Character extends FlxSpriteGroup
 						_hud.score += monster.reward;
 					}
 					_lastShot = 0;
-					break ;
+					if (--maxTarget == 0)
+						break ;
 				}
 			}
 		}

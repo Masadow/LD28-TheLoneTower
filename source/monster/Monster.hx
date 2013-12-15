@@ -1,5 +1,6 @@
 package monster;
 
+import flixel.effects.particles.FlxEmitter;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.ui.FlxBar;
@@ -16,6 +17,7 @@ class Monster extends FlxSpriteGroup
 	private var maxHealth : Int;
 	private var _graphic : FlxSprite;
 	private var _healthBar : FlxBar;
+	private var _emitter : FlxEmitter;
 
 	private function new(Asset : String)
 	{
@@ -31,6 +33,19 @@ class Monster extends FlxSpriteGroup
 		_healthBar.createFilledBar(0xFFFF0000, 0xFF00FF00);
 		add(_healthBar);
 		_healthBar.currentValue = maxHealth;
+
+		//Explode effect
+		_emitter = new FlxEmitter();
+		_emitter.makeParticles(Asset, 20);
+		_emitter.xVelocity.min = -20;
+		_emitter.xVelocity.max = 20;
+		_emitter.yVelocity.min = -20;
+		_emitter.yVelocity.max = 20;
+		_emitter.startScale.min = 0.3;
+		_emitter.startScale.max = 0.3;
+		_emitter.endScale.min = 0.1;
+		_emitter.endScale.max = 0.1;
+		Reg.emmiters.add(_emitter);
 	}
 	
 	override public function draw() {
@@ -40,6 +55,14 @@ class Monster extends FlxSpriteGroup
 	override public function update() {
 		_healthBar.angle = 0;
 		super.update();
+	}
+	
+	override public function kill():Void 
+	{
+		super.kill();
+
+		_emitter.at(_graphic);
+		_emitter.start(true, 1, 0, 0, 1);
 	}
 	
 	override public function reset(X:Float, Y:Float):Void 

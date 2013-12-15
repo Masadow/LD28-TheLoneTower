@@ -2,6 +2,7 @@ package monster;
 import flixel.group.FlxGroup;
 import flixel.tile.FlxTilemap;
 import flixel.FlxG;
+import flixel.util.FlxMath;
 import flixel.util.FlxPoint;
 import flixel.util.FlxPath;
 import flixel.util.FlxRandom;
@@ -15,7 +16,7 @@ class MonsterGroup extends FlxGroup
 	private var _hud : Hud;
 	private var _tilemap : FlxTilemap;
 	private var entriesY : Array<Int>;
-	private var exitY : Map < Int, Array<Int> > ;
+	private var exitY : Array<Int>;
 	private var _nextSpawn : Float;
 	private var _elapsed : Float;
 
@@ -23,12 +24,8 @@ class MonsterGroup extends FlxGroup
 	{
 		super();
 		
-		entriesY = [1, 11, 24];
-		
-		exitY = new Map < Int, Array<Int> > ();
-		exitY[1] = [0, 5, 15];
-		exitY[11] = [16, 26];
-		exitY[24] = [29, 31, 33, 35];
+		entriesY = [1, 7, 11, 20, 24];
+		exitY = [0, 5, 7, 9, 14, 16, 25, 27, 29, 31, 33];
 		
 		_hud = hud;
 		_tilemap = Tilemap;
@@ -41,7 +38,7 @@ class MonsterGroup extends FlxGroup
 	private function getMonster<T:Monster>(type : Class<T>) : Monster
 	{
 		var monster : Monster = null;
-		for (dead in iteratorDead())
+		for (dead in iteratorDead)
 		{
 			if (Std.is(dead, type))
 			{				
@@ -60,7 +57,9 @@ class MonsterGroup extends FlxGroup
 
 	override public function update() {
 		super.update();
-
+		
+		_nextSpawn = f(_hud.score);
+		
 		for (entry in entriesY) {
 			//Do we spawn a monster ?
 			_elapsed += FlxG.elapsed;
@@ -78,7 +77,7 @@ class MonsterGroup extends FlxGroup
 				monster.y = entry * 16;
 				
 				//Pick an exit at random
-				var exit = exitY[entry][FlxRandom.intRanged(0, exitY[entry].length - 1)];
+				var exit = exitY[FlxRandom.intRanged(0, exitY.length - 1)];
 				
 				//entry = entriesY[1];
 				//monster.y = entry * 16;
@@ -95,7 +94,7 @@ class MonsterGroup extends FlxGroup
 					path.run(monster, points, monster.speed, 0, true);
 					//path.run(monster, points, 100, 0, true);
 				}
-
+				
 				add(monster);
 			}
 		}
@@ -103,11 +102,9 @@ class MonsterGroup extends FlxGroup
 	
 	private function f(Score : Int) : Float {
 //		Spawning rate (second per)
-//		f(x) = a x + b;
-//		f(0) = b = 5
-//		f(1000) = a 1000 + 5 = 2
-//		a = -3 / 1000
-		return - 3 / 1000 * Score + 5;
+		var fscore = Score / 100000;
+		fscore = 7 - (fscore * fscore + fscore * Math.sin(Score));
+		return fscore > 1 ? fscore : 1;
 	}
 	
 }

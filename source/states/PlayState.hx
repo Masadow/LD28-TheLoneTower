@@ -11,6 +11,7 @@ import flixel.ui.FlxButton;
 import flixel.util.FlxMath;
 import flixel.FlxObject;
 import flixel.util.FlxPath;
+import flixel.util.FlxSpriteUtil;
 import monster.Monster;
 import monster.MonsterGroup;
 import openfl.Assets;
@@ -43,6 +44,7 @@ class PlayState extends FlxState
 	private var _hud : Hud;
 	private var _price : Price;
 	private var _monsters : MonsterGroup;
+	private var _mousePointer : FlxSprite;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -53,10 +55,15 @@ class PlayState extends FlxState
 		FlxG.cameras.bgColor = 0xff131c1b;
 		// Show the mouse (in case it hasn't been disabled)
 		#if !FLX_NO_MOUSE
-		FlxG.mouse.show();
+//		FlxG.mouse.show();
 		#end
+		FlxG.mouse.hide();
 		
 		super.create();
+		
+		_mousePointer = new FlxSprite(0, 0, null);
+		_mousePointer.makeGraphic(3, 3, 0x0);
+		FlxSpriteUtil.drawCircle(_mousePointer, 1, 1, 1, 0xFFFF0000);
 		
 		//Run soundtrack
 		FlxG.sound.playMusic("music/loop.wav", 0.7);
@@ -93,10 +100,12 @@ class PlayState extends FlxState
 		_price = new Price(_tower, _hud, _tilemap);
 
 		add(_tower);
-		add(_price);
+//		add(_price);
 		add(_monsters);
-		add(hover);
-		add(_hud);		
+//		add(hover);
+		add(Reg.emmiters);
+		add(_hud);
+		add(_mousePointer);
 	}
 	
 	/**
@@ -114,21 +123,24 @@ class PlayState extends FlxState
 	override public function update():Void
 	{
 		super.update();
+		
+		_mousePointer.x = FlxG.mouse.x;
+		_mousePointer.y = FlxG.mouse.y;
 
 		var tile = _tilemap.getTile(Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
 		
-		if (FlxG.mouse.justPressed)
-		{
-			if (_price.value <= _hud.money && tile == 0)
+		//if (FlxG.mouse.justPressed)
+		//{
+			if (/*_price.value <= _hud.money && */ tile == 0)
 			{
-				FlxG.sound.play("sounds/move.wav");
-				_hud.money -= _price.value;
+				//FlxG.sound.play("sounds/move.wav");
+//				_hud.money -= _price.value;
 				_tower.x = FlxG.mouse.x - FlxG.mouse.x % 16;
 				_tower.y = FlxG.mouse.y - FlxG.mouse.y % 16;
 			}
-			else
-			{
-				var monster : Monster = null;
+			//else
+			//{
+				//var monster : Monster = null;
 				//Enable killing monsters with mouse
 				//for (m in _monsters.iteratorAlive())
 				//{
@@ -138,48 +150,66 @@ class PlayState extends FlxState
 						//break ;
 					//}
 				//}
-				if (monster == null)
-					FlxG.sound.play("sounds/error.wav");
-				else {
-					FlxG.sound.play("sounds/shoot.wav");
-					monster.hurt(5);
-					if (!monster.alive) {
-						FlxG.sound.play("sounds/dead.wav");
-						_hud.score += monster.reward;
-						_hud.money += monster.reward;
-					}
-				}
-			}
-		}
+				//if (monster == null)
+					//FlxG.sound.play("sounds/error.wav");
+				//else {
+					//FlxG.sound.play("sounds/shoot.wav");
+					//monster.hurt(5);
+					//if (!monster.alive) {
+						//FlxG.sound.play("sounds/dead.wav");
+						//_hud.score += monster.reward;
+						//_hud.money += monster.reward;
+					//}
+				//}
+			//}
+		//}
 
 		//Every level up, increase range by one
 		if (levelup()) {
 			FlxG.sound.play("sounds/levelup.wav");
-			_hud.upgrade++;
+//			_hud.upgrade++;
 			_tower.level++;
+			_tower.range++;
 		}
 		
-		if (_hud.upgrade > 0)
-		{
-			if (FlxG.keys.justPressed.Q)
-				_tower.range++;
-			else if (FlxG.keys.justPressed.W)
-				_tower.firerate *= 0.9;
-			else if (FlxG.keys.justPressed.E)
+		//if (_hud.upgrade > 0)
+		//{
+			if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
+			{
+				_hud.money -= _hud.priceTarget;
+				_hud.priceTarget += Std.int(_hud.priceTarget / 10);
+				_tower.target++;
+				FlxG.sound.play("sounds/upgrade.wav");
+			}
+			if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
+			{
+				_hud.money -= _hud.priceFirerate;
+				_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
+				_tower.firerate *= 0.95;
+				FlxG.sound.play("sounds/upgrade.wav");
+			}
+			else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
+			{
+				_hud.money -= _hud.pricePower;
+				_hud.pricePower += Std.int(_hud.pricePower / 10);
 				_tower.power += 4;
-			else
-				_hud.upgrade++;
-			_hud.upgrade--;
-		}
+				FlxG.sound.play("sounds/upgrade.wav");
+			}
+			else if (FlxG.keyboard.justPressed("W", "Q", "E"))
+				FlxG.sound.play("sounds/error.wav");
+			//else
+				//_hud.upgrade++;
+			//_hud.upgrade--;
+		//}
 		
 		//check if a monster has reach the opposite side
-		for (monster in _monsters.iteratorAlive())
+		for (monster in _monsters.iteratorAlive)
 		{
 			if ((cast monster).x > FlxG.width - 24) {
 				FlxG.switchState(new EndState(_hud.score));
 			}
 		}
-		
+
 		if (FlxG.keyboard.justPressed("M")) {
 			if (FlxG.sound.music.playing)
 				FlxG.sound.music.stop();
