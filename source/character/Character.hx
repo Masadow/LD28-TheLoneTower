@@ -20,6 +20,7 @@ class Character extends FlxSpriteGroup
 	
 	private var _canon : FlxSprite;
 	private var _rangeCircle : RangeCircle;
+	private var _structure : FlxSprite;
 	
 	public var firerate(default, set) : Float;
 	public var power(default, set) : Int;
@@ -65,9 +66,9 @@ class Character extends FlxSpriteGroup
 		_monsters = Monsters;
 		_hud = hud;
 		
-		var structure = new FlxSprite();
-		structure.loadGraphic("images/tower.png");
-		add(structure);
+		_structure = new FlxSprite();
+		_structure.loadGraphic("images/tower.png");
+		add(_structure);
 		
 		//Create the canon
 		_canon = new FlxSprite();
@@ -85,19 +86,20 @@ class Character extends FlxSpriteGroup
 		target = 1;
 	}
 	
+	static var t : Int = 0;
+	
 	override  function update():Void 
 	{
 		super.update();
 		
-		_rangeCircle.x = x - _rangeCircle.range * 16;
-		_rangeCircle.y = y - _rangeCircle.range * 16;
+		_rangeCircle.x = _structure.x - _rangeCircle.range * 16;
+		_rangeCircle.y = _structure.y - _rangeCircle.range * 16;
 		
 		//Remove dead missiles
 		var removeList: List<FlxBasic> = new List<FlxBasic>();
-		for (dead in Reg.emmiters.iteratorDead)
+		for (dead in Reg.emmiters.iterator(function(m) { return !m.alive && Std.is(m, Missile); }))
 		{
-			if (Std.is(dead, Missile))
-				removeList.push(dead);
+			removeList.push(dead);
 		}
 		for (missile in removeList)
 		{
@@ -110,14 +112,14 @@ class Character extends FlxSpriteGroup
 		if (_lastShot > firerate)
 		{
 			//Check if there is a monster in range
-			for (monsterBasic in _monsters.iteratorAlive)
+			for (monsterBasic in _monsters.iterator(function(m) { return m.exists && m.alive; }))
 			{
 				var monster : Monster = cast monsterBasic;
-				var midMonster : FlxPoint = new FlxPoint(monster.x + 8, monster.y + 8);
-				var midPoint : FlxPoint = getMidpoint();
+				var midMonster : FlxPoint = monster.getMidpoint();
+				var midPoint : FlxPoint = _structure.getMidpoint();
 				var topPoint : FlxPoint = midPoint;
 				topPoint.y -= 8;
-				if (Std.int(FlxMath.getDistance(midMonster, getMidpoint())) < 16 * range + 8)
+				if (Std.int(FlxMath.getDistance(midMonster, midPoint)) < 16 * range + 8)
 				{
 					//Rotate the canon
 					//Does not work
@@ -128,7 +130,7 @@ class Character extends FlxSpriteGroup
 					_canon.set_angle(Math.acos((topmid.x * monmid.x + topmid.y * monmid.y) / (topmidb * monmidb)));
 
 					//Fire a missile
-					Reg.emmiters.add(new Missile(x + 8, y + 8, monster.getMidpoint())); 
+					Reg.emmiters.add(new Missile(_structure.x + 8, _structure.y + 8, monster.getMidpoint())); 
 					
 					FlxG.sound.play("sounds/shoot.wav");
 					monster.hurt(power);

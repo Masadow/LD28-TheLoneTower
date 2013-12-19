@@ -38,13 +38,10 @@ class MonsterGroup extends FlxGroup
 	private function getMonster<T:Monster>(type : Class<T>) : Monster
 	{
 		var monster : Monster = null;
-		for (dead in iteratorDead)
+		for (dead in iterator(function(m) { return !m.alive && Std.is(m, type); }))
 		{
-			if (Std.is(dead, type))
-			{				
-				monster = cast dead;
-				break ;
-			}
+			monster = cast dead;
+			break ;
 		}
 
 		if (monster == null)
@@ -57,9 +54,9 @@ class MonsterGroup extends FlxGroup
 
 	override public function update() {
 		super.update();
-		
+
 		_nextSpawn = f(_hud.score);
-		
+
 		for (entry in entriesY) {
 			//Do we spawn a monster ?
 			_elapsed += FlxG.elapsed;
@@ -78,30 +75,25 @@ class MonsterGroup extends FlxGroup
 				
 				//Pick an exit at random
 				var exit = exitY[FlxRandom.intRanged(0, exitY.length - 1)];
-				
-				//entry = entriesY[1];
-				//monster.y = entry * 16;
-				//exit = exitY[entry][1];
-				
+								
 				//Set the path for the monster
 				var entryY = entry * 16 + 8;
 				var exitY = exit * 16 + 8;
 				
 				var points = _tilemap.findPath(new FlxPoint(8, entryY), new FlxPoint(FlxG.width - 8, exitY));
-				if (points != null) {
+				if (points != null && !FlxG.paused) {
 					var path : FlxPath = FlxPath.recycle();
 					
 					path.run(monster, points, monster.speed, 0, true);
-					//path.run(monster, points, 100, 0, true);
 				}
 				
 				monster.balanceLife(_hud.score);
-				
+
 				add(monster);
 			}
 		}
 	}
-	
+
 	private function f(Score : Int) : Float {
 //		Spawning rate (second per)
 		var fscore = Score / 100000;

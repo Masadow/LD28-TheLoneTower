@@ -118,6 +118,6 @@ class Hud extends FlxSpriteGroup
 		upgrade = 0;
 		pricePower = 200;
 		priceFirerate = 300;
-		priceTarget = 1500;
+		priceTarget = 1000;
 	}
 }

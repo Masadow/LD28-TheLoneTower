@@ -5,6 +5,8 @@ import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.ui.FlxBar;
 import flixel.FlxObject;
+import flixel.util.FlxPoint;
+import openfl.utils.Float32Array;
 
 /**
  * ...
@@ -19,13 +21,32 @@ class Monster extends FlxSpriteGroup
 	private var _healthBar : FlxBar;
 	private var _emitter : FlxEmitter;
 	private var _barWidth : Int;
+	private var _modifier : Float;
+		
+	override public function getMidpoint(?point:FlxPoint):FlxPoint 
+	{
+		return _graphic.getMidpoint(point);
+	}
 
+	
+	override public function get_width():Float
+	{
+		return _graphic.width;
+	}
+	
+	override public function get_height():Float
+	{
+		return _graphic.height;
+	}
+	
 	private function new(Asset : String)
 	{
 		super();
 
 		_graphic = new FlxSprite(0, 0, Asset);
 		add(_graphic);
+		
+		_modifier = 1;
 		
 		width = _graphic.width;
 		height = _graphic.height;
@@ -65,13 +86,15 @@ class Monster extends FlxSpriteGroup
 	
 	public function balanceLife(Score : Int):Void
 	{
-		maxHealth += Std.int(Score / 200);
+		maxHealth += Std.int((Score / 200) * _modifier);
 		health = maxHealth;
 		remove(_healthBar);
 		_healthBar = new FlxBar( _graphic.width / 2 - _barWidth, 0, FlxBar.FILL_LEFT_TO_RIGHT, _barWidth * 2, 2, this, "health", 0, maxHealth);
 		_healthBar.createFilledBar(0xFFFF0000, 0xFF00FF00);
 		add(_healthBar);
 		_healthBar.currentValue = maxHealth;
+		width = _graphic.width;
+		height = _graphic.height;
 	}
 	
 	override public function reset(X:Float, Y:Float):Void 
@@ -81,5 +104,5 @@ class Monster extends FlxSpriteGroup
 		health = maxHealth;
 		alive = true;
 		revive();
-	}	
+	}
 }

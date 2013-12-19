@@ -12,6 +12,8 @@ class Monster3 extends Monster
 		maxHealth = 200;
 		reward = 200;
 		speed = 20;
+		
+		_modifier = 1.7;
 
 		super("images/monster3.png");
 

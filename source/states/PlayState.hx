@@ -1,5 +1,6 @@
 package states;
 
+import flixel.addons.editors.tiled.TiledLayer;
 import flixel.tile.FlxTilemap;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -42,7 +43,6 @@ class PlayState extends FlxState
 	private var _tilemap: FlxTilemap;
 	private var _path: FlxPath;
 	private var _hud : Hud;
-	private var _price : Price;
 	private var _monsters : MonsterGroup;
 	private var _mousePointer : FlxSprite;
 	
@@ -53,10 +53,7 @@ class PlayState extends FlxState
 	{
 		// Set a background color
 		FlxG.cameras.bgColor = 0xff131c1b;
-		// Show the mouse (in case it hasn't been disabled)
-		#if !FLX_NO_MOUSE
-//		FlxG.mouse.show();
-		#end
+
 		FlxG.mouse.hide();
 		
 		super.create();
@@ -77,8 +74,6 @@ class PlayState extends FlxState
 				TILE_WIDTH, TILE_HEIGHT, FlxTilemap.OFF,
 				0, 0);
 		add(_tilemap);
-		
-//		FlxG.camera.follow(_tilemap);
 
 		_tilemap.setTileProperties(1, FlxObject.NONE, 11);
 		//_tilemap.setTileProperties(1, FlxObject.LEFT + FlxObject.DOWN);
@@ -90,8 +85,6 @@ class PlayState extends FlxState
 		//_tilemap.setTileProperties(11, FlxObject.LEFT + FlxObject.RIGHT);
 		_tilemap.setTileProperties(0, FlxObject.ANY);
 
-		var hover = new Hover();
-				
 		_hud = new Hud();
 		
 		_monsters = new MonsterGroup(_hud, _tilemap); 
@@ -99,12 +92,8 @@ class PlayState extends FlxState
 		//Create the tower
 		_tower = new Character(320, 320, _monsters, _hud);
 
-		_price = new Price(_tower, _hud, _tilemap);
-
 		add(_tower);
-//		add(_price);
 		add(_monsters);
-//		add(hover);
 		add(Reg.emmiters);
 		add(_hud);
 		add(_mousePointer);
@@ -119,6 +108,36 @@ class PlayState extends FlxState
 		super.destroy();
 	}
 
+	//Find the nearest tile from origin
+	private function nearestTile(Origin : FlxPoint, X : Int, Y : Int) : FlxPoint
+	{
+		var closest : FlxPoint = null;
+		var tmp : FlxPoint = null;
+		
+		if (X > 0 && _tilemap.getTile(X - 1, Y) == 0)
+			closest = new FlxPoint((X - 1) * 16 + 8, Y * 16 + 8);
+		if (X < _tilemap.widthInTiles - 1 && _tilemap.getTile(X + 1, Y) == 0)
+		{
+			tmp = new FlxPoint((X + 1) * 16 + 8, Y * 16 + 8);
+			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
+				closest = tmp;
+		}
+		if (Y > 0 && _tilemap.getTile(X, Y - 1) == 0)
+		{
+			tmp = new FlxPoint(X * 16 + 8, (Y - 1) * 16 + 8);
+			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
+				closest = tmp;
+		}
+		if (Y < _tilemap.heightInTiles - 1 && _tilemap.getTile(X, Y + 1) == 0)
+		{
+			tmp = new FlxPoint(X * 16 + 8, (Y + 1) * 16 + 8);
+			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
+				closest = tmp;
+		}
+		//No closest on 4 way intersection since we have already met a closest tile previously.
+		return closest;
+	}
+	
 	/**
 	 * Function that is called once every frame.
 	 */
@@ -130,82 +149,51 @@ class PlayState extends FlxState
 		_mousePointer.y = FlxG.mouse.y;
 
 		var tile = _tilemap.getTile(Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
-		
-		//if (FlxG.mouse.justPressed)
-		//{
-			if (/*_price.value <= _hud.money && */ tile == 0)
-			{
-				//FlxG.sound.play("sounds/move.wav");
-//				_hud.money -= _price.value;
-				_tower.x = FlxG.mouse.x - FlxG.mouse.x % 16;
-				_tower.y = FlxG.mouse.y - FlxG.mouse.y % 16;
-			}
-			//else
-			//{
-				//var monster : Monster = null;
-				//Enable killing monsters with mouse
-				//for (m in _monsters.iteratorAlive())
-				//{
-					//if ((cast m).overlapsPoint(FlxG.mouse.getWorldPosition()))
-					//{
-						//monster = cast m;
-						//break ;
-					//}
-				//}
-				//if (monster == null)
-					//FlxG.sound.play("sounds/error.wav");
-				//else {
-					//FlxG.sound.play("sounds/shoot.wav");
-					//monster.hurt(5);
-					//if (!monster.alive) {
-						//FlxG.sound.play("sounds/dead.wav");
-						//_hud.score += monster.reward;
-						//_hud.money += monster.reward;
-					//}
-				//}
-			//}
-		//}
+
+		//Tower move
+		var p = FlxG.mouse.getWorldPosition();
+		if (tile != 0)
+		{
+			//Find the nearest position
+			p = nearestTile(FlxG.mouse.getWorldPosition(), Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
+		}
+		_tower.x = p.x - p.x % 16;
+		_tower.y = p.y - p.y % 16;
 
 		//Every level up, increase range by one
 		if (levelup()) {
 			FlxG.sound.play("sounds/levelup.wav");
-//			_hud.upgrade++;
 			_tower.level++;
 			_tower.range++;
 		}
 		
-		//if (_hud.upgrade > 0)
-		//{
-			if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
-			{
-				_hud.money -= _hud.priceTarget;
-				_hud.priceTarget += Std.int(_hud.priceTarget / 10);
-				_tower.target++;
-				FlxG.sound.play("sounds/upgrade.wav");
-			}
-			if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
-			{
-				_hud.money -= _hud.priceFirerate;
-				_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
-				_tower.firerate *= 0.95;
-				FlxG.sound.play("sounds/upgrade.wav");
-			}
-			else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
-			{
-				_hud.money -= _hud.pricePower;
-				_hud.pricePower += Std.int(_hud.pricePower / 10);
-				_tower.power += 4;
-				FlxG.sound.play("sounds/upgrade.wav");
-			}
-			else if (FlxG.keyboard.justPressed("W", "Q", "E"))
-				FlxG.sound.play("sounds/error.wav");
-			//else
-				//_hud.upgrade++;
-			//_hud.upgrade--;
-		//}
+		//Upgrades
+		if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
+		{
+			_hud.money -= _hud.priceTarget;
+			_hud.priceTarget += Std.int(_hud.priceTarget / 10);
+			_tower.target++;
+			FlxG.sound.play("sounds/upgrade.wav");
+		}
+		else if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
+		{
+			_hud.money -= _hud.priceFirerate;
+			_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
+			_tower.firerate *= 0.95;
+			FlxG.sound.play("sounds/upgrade.wav");
+		}
+		else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
+		{
+			_hud.money -= _hud.pricePower;
+			_hud.pricePower += Std.int(_hud.pricePower / 10);
+			_tower.power += 3;
+			FlxG.sound.play("sounds/upgrade.wav");
+		}
+		else if (FlxG.keyboard.justPressed("W", "Q", "E"))
+			FlxG.sound.play("sounds/error.wav");
 		
 		//check if a monster has reach the opposite side
-		for (monster in _monsters.iteratorAlive)
+		for (monster in _monsters.iterator(function(m) { return m.exists && m.alive; }))
 		{
 			if ((cast monster).x > FlxG.width - 24) {
 				FlxG.switchState(new EndState(_hud.score));

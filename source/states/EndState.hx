@@ -23,15 +23,12 @@ class EndState extends FlxState
 	{
 		// Set a background color
 		FlxG.cameras.bgColor = 0xff131c1b;
-		// Show the mouse (in case it hasn't been disabled)
-		#if !FLX_NO_MOUSE
-//		FlxG.mouse.show();
-		#end
 		FlxG.mouse.show();
 
 		super.create();
 
-		FlxG.sound.music.stop();
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
 		FlxG.sound.play("sounds/loose.wav");
 		
 		var txt : FlxText = new FlxText(0, 100, FlxG.width, "GAME OVER", 32);
