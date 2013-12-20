@@ -185,23 +185,26 @@ class PlayState extends FlxState
 			//Find the nearest position
 			p = nearestTile(FlxG.mouse.getWorldPosition(), Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
 		}
-		var new_x = p.x - p.x % 16;
-		var new_y = p.y - p.y % 16;
-		//if the tower has moved
-		if (_tower.x != new_x || _tower.y != new_y)
+		if (p != null)
 		{
-//			Looking for an object to recycle
-			var circle : Circle = null;
-			for (towerMove in _towerMoves.iterator(function(m) { return !m.visible; } ))
+			var new_x = p.x - p.x % 16;
+			var new_y = p.y - p.y % 16;
+			//if the tower has moved
+			if (_tower.x != new_x || _tower.y != new_y)
 			{
-				circle = cast towerMove;
-				break ;
+	//			Looking for an object to recycle
+				var circle : Circle = null;
+				for (towerMove in _towerMoves.iterator(function(m) { return !m.visible; } ))
+				{
+					circle = cast towerMove;
+					break ;
+				}
+				if (circle == null)
+					_towerMoves.add((circle = new Circle()));
+				circle.run(_tower.x, _tower.y);
+				_tower.x = new_x;
+				_tower.y = new_y;
 			}
-			if (circle == null)
-				_towerMoves.add((circle = new Circle()));
-			circle.run(_tower.x, _tower.y);
-			_tower.x = new_x;
-			_tower.y = new_y;
 		}
 
 		//Every level up, increase range by one
