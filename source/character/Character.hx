@@ -3,13 +3,14 @@ package character;
 import flixel.FlxBasic;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.group.FlxGroup;
 import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxPoint;
 import monster.Monster;
 import monster.MonsterGroup;
 import flixel.util.FlxMath;
 import flixel.system.FlxSound;
-import openfl.utils.Float32Array;
+import flixel.addons.text.FlxBlinkText;
 
 /**
  * ...
@@ -21,6 +22,10 @@ class Character extends FlxSpriteGroup
 	private var _canon : FlxSprite;
 	private var _rangeCircle : RangeCircle;
 	private var _structure : FlxSprite;
+	
+	private var _powerUpgrade : FlxBlinkText;
+	private var _targetUpgrade : FlxBlinkText;
+	private var _firerateUpgrade : FlxBlinkText;
 	
 	public var firerate(default, set) : Float;
 	public var power(default, set) : Int;
@@ -84,6 +89,20 @@ class Character extends FlxSpriteGroup
 		firerate = 0.5; //Second between shots
 		_lastShot = 0;
 		target = 1;
+		
+		_firerateUpgrade = new FlxBlinkText(-12, -10, 12, "Q", 0.3);
+		_firerateUpgrade.visible = false;
+		_firerateUpgrade.alpha = 0.8;
+		add(_firerateUpgrade);
+		_powerUpgrade = new FlxBlinkText(2, -10, 12, "W", 0.3);
+		_powerUpgrade.visible = false;
+		_powerUpgrade.alpha = 0.8;
+		add(_powerUpgrade);
+		_targetUpgrade = new FlxBlinkText(16, -10, 12, "E", 0.3);
+		_targetUpgrade.visible = false;
+		_targetUpgrade.alpha = 0.8;
+		add(_targetUpgrade);
+		
 	}
 	
 	static var t : Int = 0;
@@ -94,6 +113,11 @@ class Character extends FlxSpriteGroup
 		
 		_rangeCircle.x = _structure.x - _rangeCircle.range * 16;
 		_rangeCircle.y = _structure.y - _rangeCircle.range * 16;
+		
+		//Upgrade UI
+		_firerateUpgrade.visible = _hud.money > _hud.priceFirerate;
+		_powerUpgrade.visible = _hud.money > _hud.pricePower;
+		_powerUpgrade.visible = _hud.money > _hud.priceTarget;
 		
 		//Remove dead missiles
 		var removeList: List<FlxBasic> = new List<FlxBasic>();

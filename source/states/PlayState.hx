@@ -1,5 +1,6 @@
 package states;
 
+import character.Circle;
 import flixel.addons.editors.tiled.TiledLayer;
 import flixel.tile.FlxTilemap;
 import flixel.FlxCamera;
@@ -32,19 +33,13 @@ class PlayState extends FlxState
 	inline static private var TILE_WIDTH:Int = 16;
 	inline static private var TILE_HEIGHT:Int = 16;
 	
-	//inline static private var TILESET = "images/iso_tileset2.png";
-	//inline static private var MAP = "data/map.cvs";
-	//inline static private var TILE_WIDTH:Int = 50;
-	//inline static private var TILE_HEIGHT:Int = 0;
-	//inline static private var TILE_DEPTH:Int = 25;
-	//inline static private var WATER:Int = 4;
-	
 	private var _tower: Character;
 	private var _tilemap: FlxTilemap;
 	private var _path: FlxPath;
 	private var _hud : Hud;
 	private var _monsters : MonsterGroup;
 	private var _mousePointer : FlxSprite;
+	private var _towerMoves : FlxGroup;
 	
 	/**
 	 * Function that is called up when to state is created to set it up. 
@@ -91,7 +86,12 @@ class PlayState extends FlxState
 
 		//Create the tower
 		_tower = new Character(320, 320, _monsters, _hud);
+		
+		//Create the group containing the moves circles
+		_towerMoves = new FlxGroup();
+		Circle.initGraphic();
 
+		add(_towerMoves);
 		add(_tower);
 		add(_monsters);
 		add(Reg.emmiters);
@@ -106,6 +106,34 @@ class PlayState extends FlxState
 	override public function destroy():Void
 	{
 		super.destroy();
+	}
+
+	//Upgrades
+	private function checkForUpgrade()
+	{
+		if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
+		{
+			_hud.money -= _hud.priceTarget;
+			_hud.priceTarget += Std.int(_hud.priceTarget / 10);
+			_tower.target++;
+			FlxG.sound.play("sounds/upgrade.wav");
+		}
+		else if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
+		{
+			_hud.money -= _hud.priceFirerate;
+			_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
+			_tower.firerate *= 0.95;
+			FlxG.sound.play("sounds/upgrade.wav");
+		}
+		else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
+		{
+			_hud.money -= _hud.pricePower;
+			_hud.pricePower += Std.int(_hud.pricePower / 10);
+			_tower.power += 3;
+			FlxG.sound.play("sounds/upgrade.wav");
+		}
+		else if (FlxG.keyboard.justPressed("W", "Q", "E"))
+			FlxG.sound.play("sounds/error.wav");
 	}
 
 	//Find the nearest tile from origin
@@ -157,8 +185,24 @@ class PlayState extends FlxState
 			//Find the nearest position
 			p = nearestTile(FlxG.mouse.getWorldPosition(), Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
 		}
-		_tower.x = p.x - p.x % 16;
-		_tower.y = p.y - p.y % 16;
+		var new_x = p.x - p.x % 16;
+		var new_y = p.y - p.y % 16;
+		//if the tower has moved
+		if (_tower.x != new_x || _tower.y != new_y)
+		{
+//			Looking for an object to recycle
+			var circle : Circle = null;
+			for (towerMove in _towerMoves.iterator(function(m) { return !m.visible; } ))
+			{
+				circle = cast towerMove;
+				break ;
+			}
+			if (circle == null)
+				_towerMoves.add((circle = new Circle()));
+			circle.run(_tower.x, _tower.y);
+			_tower.x = new_x;
+			_tower.y = new_y;
+		}
 
 		//Every level up, increase range by one
 		if (levelup()) {
@@ -167,30 +211,7 @@ class PlayState extends FlxState
 			_tower.range++;
 		}
 		
-		//Upgrades
-		if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
-		{
-			_hud.money -= _hud.priceTarget;
-			_hud.priceTarget += Std.int(_hud.priceTarget / 10);
-			_tower.target++;
-			FlxG.sound.play("sounds/upgrade.wav");
-		}
-		else if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
-		{
-			_hud.money -= _hud.priceFirerate;
-			_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
-			_tower.firerate *= 0.95;
-			FlxG.sound.play("sounds/upgrade.wav");
-		}
-		else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
-		{
-			_hud.money -= _hud.pricePower;
-			_hud.pricePower += Std.int(_hud.pricePower / 10);
-			_tower.power += 3;
-			FlxG.sound.play("sounds/upgrade.wav");
-		}
-		else if (FlxG.keyboard.justPressed("W", "Q", "E"))
-			FlxG.sound.play("sounds/error.wav");
+		checkForUpgrade();
 		
 		//check if a monster has reach the opposite side
 		for (monster in _monsters.iterator(function(m) { return m.exists && m.alive; }))
