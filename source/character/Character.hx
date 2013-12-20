@@ -11,6 +11,7 @@ import monster.MonsterGroup;
 import flixel.util.FlxMath;
 import flixel.system.FlxSound;
 import flixel.addons.text.FlxBlinkText;
+import haxe.ds.ArraySort;
 
 /**
  * ...
@@ -132,42 +133,50 @@ class Character extends FlxSpriteGroup
 		
 		var maxTarget = target;
 		_lastShot += FlxG.elapsed;
-		//Check if we should shoot
+		//Retrieve every monsters in range
 		if (_lastShot > firerate)
 		{
+			var monstersInRange : Array<Monster> = new Array<Monster>();
 			//Check if there is a monster in range
 			for (monsterBasic in _monsters.iterator(function(m) { return m.exists && m.alive; }))
 			{
-				var monster : Monster = cast monsterBasic;
-				var midMonster : FlxPoint = monster.getMidpoint();
+				var midMonster : FlxPoint = (cast monsterBasic).getMidpoint();
 				var midPoint : FlxPoint = _structure.getMidpoint();
-				var topPoint : FlxPoint = midPoint;
-				topPoint.y -= 8;
 				if (Std.int(FlxMath.getDistance(midMonster, midPoint)) < 16 * range + 8)
 				{
-					//Rotate the canon
-					//Does not work
-					var topmid : FlxPoint = new FlxPoint(midPoint.x - topPoint.x, midPoint.y - topPoint.y);
-					var monmid : FlxPoint = new FlxPoint(midPoint.x - midMonster.x, midPoint.y - midMonster.y);
-					var topmidb : Float = Math.sqrt(topmid.x * topmid.x + topmid.y * topmid.y);
-					var monmidb : Float = Math.sqrt(monmid.x * monmid.x + monmid.y * monmid.y);
-					_canon.set_angle(Math.acos((topmid.x * monmid.x + topmid.y * monmid.y) / (topmidb * monmidb)));
-
-					//Fire a missile
-					Reg.emmiters.add(new Missile(_structure.x + 8, _structure.y + 8, monster.getMidpoint())); 
-					
-					FlxG.sound.play("sounds/shoot.wav");
-					monster.hurt(power);
-					if (!monster.alive) {
-						//Kill monster, claim reward
-						FlxG.sound.play("sounds/dead.wav");
-						_hud.money += monster.reward;
-						_hud.score += monster.reward;
-					}
-					_lastShot = 0;
-					if (--maxTarget == 0)
-						break ;
+					monstersInRange.push(cast monsterBasic);
 				}
+			}
+			//Sort monsters in range by X position
+			ArraySort.sort(monstersInRange, function(left, right) { return Std.int(right.x - left.x); });
+//			monstersInRange
+			//Now shoot as many monsters as the tower can
+			for (monster in monstersInRange)
+			{
+				//Rotate the canon
+				//Does not work
+				//var topPoint : FlxPoint = midPoint;
+				//topPoint.y -= 8;
+				//var topmid : FlxPoint = new FlxPoint(midPoint.x - topPoint.x, midPoint.y - topPoint.y);
+				//var monmid : FlxPoint = new FlxPoint(midPoint.x - midMonster.x, midPoint.y - midMonster.y);
+				//var topmidb : Float = Math.sqrt(topmid.x * topmid.x + topmid.y * topmid.y);
+				//var monmidb : Float = Math.sqrt(monmid.x * monmid.x + monmid.y * monmid.y);
+				//_canon.set_angle(Math.acos((topmid.x * monmid.x + topmid.y * monmid.y) / (topmidb * monmidb)));
+
+				//Fire a missile
+				Reg.emmiters.add(new Missile(_structure.x + 8, _structure.y + 8, monster.getMidpoint())); 
+				
+				FlxG.sound.play("sounds/shoot.wav");
+				monster.hurt(power);
+				if (!monster.alive) {
+					//Kill monster, claim reward
+					FlxG.sound.play("sounds/dead.wav");
+					_hud.money += monster.reward;
+					_hud.score += monster.reward;
+				}
+				_lastShot = 0;
+				if (--maxTarget == 0)
+					break ;
 			}
 		}
 		
