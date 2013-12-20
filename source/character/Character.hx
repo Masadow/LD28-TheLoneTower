@@ -116,9 +116,9 @@ class Character extends FlxSpriteGroup
 		_rangeCircle.y = _structure.y - _rangeCircle.range * 16;
 		
 		//Upgrade UI
-		_firerateUpgrade.visible = _hud.money > _hud.priceFirerate;
-		_powerUpgrade.visible = _hud.money > _hud.pricePower;
-		_powerUpgrade.visible = _hud.money > _hud.priceTarget;
+		//_firerateUpgrade.visible = _hud.money > _hud.priceFirerate;
+		//_powerUpgrade.visible = _hud.money > _hud.pricePower;
+		//_powerUpgrade.visible = _hud.money > _hud.priceTarget;
 		
 		//Remove dead missiles
 		var removeList: List<FlxBasic> = new List<FlxBasic>();

@@ -1,10 +1,12 @@
 package ;
+import flixel.effects.FlxFlicker;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.ui.FlxButton;
 import flixel.text.FlxText;
 import flixel.FlxG;
+import flixel.util.FlxColor;
 
 /**
  * ...
@@ -119,5 +121,44 @@ class Hud extends FlxSpriteGroup
 		pricePower = 200;
 		priceFirerate = 300;
 		priceTarget = 1000;
+	}
+
+	private static function switchColor(o : FlxFlicker)
+	{
+		var txt : FlxText = cast o.object;
+		txt.visible = true;
+		txt.color = txt.color == 0xFFFFFF ? 0x005500 : 0xFFFFFF;
+	}
+	
+	override public function update():Void 
+	{
+		super.update();
+
+		if (money > priceFirerate && !FlxFlicker.isFlickering(_firerate))
+		{
+			FlxFlicker.flicker(_firerate, 0, 0.5, false, false, null, Hud.switchColor);
+		}
+		else if (money < priceFirerate && FlxFlicker.isFlickering(_firerate))
+		{
+			FlxFlicker.stopFlickering(_firerate);
+		}
+
+		if (money > pricePower && !FlxFlicker.isFlickering(_power))
+		{
+			FlxFlicker.flicker(_power, 0, 0.5, false, false, null, Hud.switchColor);
+		}
+		else if (money < pricePower && FlxFlicker.isFlickering(_power))
+		{
+			FlxFlicker.stopFlickering(_power);
+		}
+
+		if (money > priceTarget && !FlxFlicker.isFlickering(_target))
+		{
+			FlxFlicker.flicker(_target, 0, 0.5, false, false, null, Hud.switchColor);
+		}
+		else if (money < priceTarget && FlxFlicker.isFlickering(_target))
+		{
+			FlxFlicker.stopFlickering(_target);
+		}
 	}
 }
