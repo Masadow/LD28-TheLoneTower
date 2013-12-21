@@ -8,7 +8,8 @@ import flash.Lib;
 import flixel.FlxGame;
 
 /**
- * @author Joshua Granick
+ * Copyright 2013 - 2014 Jimmy Delas
+ * @author Masadow
  */
 class Main extends Sprite 
 {

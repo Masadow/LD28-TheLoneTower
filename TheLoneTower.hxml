@@ -1,6 +1,7 @@
 -main ApplicationMain 
 -lib openfl
 -lib flixel
+-lib tweenx
 -lib flixel-addons
 -cp source
 -cp C:\Motion-Twin\Haxe\lib\flixel-addons\flixel-addons
@@ -14,7 +15,7 @@
 -D display
 -D web
 --no-output
--swf-version 11.2
+-swf-version 11.6
 -swf export/flash/bin/lonetower.swf
 -swf-header 608:576:60:FFFFFF
 -cp export/flash/haxe

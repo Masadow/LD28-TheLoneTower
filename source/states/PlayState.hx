@@ -14,6 +14,7 @@ import flixel.util.FlxMath;
 import flixel.FlxObject;
 import flixel.util.FlxPath;
 import flixel.util.FlxSpriteUtil;
+import map.Tile;
 import monster.Monster;
 import monster.MonsterGroup;
 import openfl.Assets;
@@ -70,7 +71,7 @@ class PlayState extends FlxState
 				0, 0);
 		add(_tilemap);
 
-		_tilemap.setTileProperties(1, FlxObject.NONE, 11);
+		_tilemap.setTileProperties(4, FlxObject.NONE, 11);
 		//_tilemap.setTileProperties(1, FlxObject.LEFT + FlxObject.DOWN);
 		//_tilemap.setTileProperties(2, FlxObject.UP + FlxObject.RIGHT);
 		//_tilemap.setTileProperties(3, FlxObject.DOWN + FlxObject.RIGHT);
@@ -78,7 +79,7 @@ class PlayState extends FlxState
 		//_tilemap.setTileProperties(7, FlxObject.UP);
 		//_tilemap.setTileProperties(8, FlxObject.NONE);
 		//_tilemap.setTileProperties(11, FlxObject.LEFT + FlxObject.RIGHT);
-		_tilemap.setTileProperties(0, FlxObject.ANY);
+		_tilemap.setTileProperties(0, FlxObject.ANY, 4);
 
 		_hud = new Hud();
 		
@@ -142,21 +143,21 @@ class PlayState extends FlxState
 		var closest : FlxPoint = null;
 		var tmp : FlxPoint = null;
 		
-		if (X > 0 && _tilemap.getTile(X - 1, Y) == 0)
+		if (X > 0 && Tile.isGrass(_tilemap.getTile(X - 1, Y)))
 			closest = new FlxPoint((X - 1) * 16 + 8, Y * 16 + 8);
-		if (X < _tilemap.widthInTiles - 1 && _tilemap.getTile(X + 1, Y) == 0)
+		if (X < _tilemap.widthInTiles - 1 && Tile.isGrass(_tilemap.getTile(X + 1, Y)))
 		{
 			tmp = new FlxPoint((X + 1) * 16 + 8, Y * 16 + 8);
 			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
 				closest = tmp;
 		}
-		if (Y > 0 && _tilemap.getTile(X, Y - 1) == 0)
+		if (Y > 0 && Tile.isGrass(_tilemap.getTile(X, Y - 1)))
 		{
 			tmp = new FlxPoint(X * 16 + 8, (Y - 1) * 16 + 8);
 			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
 				closest = tmp;
 		}
-		if (Y < _tilemap.heightInTiles - 1 && _tilemap.getTile(X, Y + 1) == 0)
+		if (Y < _tilemap.heightInTiles - 1 && Tile.isGrass(_tilemap.getTile(X, Y + 1)))
 		{
 			tmp = new FlxPoint(X * 16 + 8, (Y + 1) * 16 + 8);
 			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
@@ -180,7 +181,7 @@ class PlayState extends FlxState
 
 		//Tower move
 		var p = FlxG.mouse.getWorldPosition();
-		if (tile != 0)
+		if (!Tile.isGrass(tile))
 		{
 			//Find the nearest position
 			p = nearestTile(FlxG.mouse.getWorldPosition(), Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
