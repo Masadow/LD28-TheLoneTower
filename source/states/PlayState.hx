@@ -14,12 +14,13 @@ import flixel.util.FlxMath;
 import flixel.FlxObject;
 import flixel.util.FlxPath;
 import flixel.util.FlxSpriteUtil;
-import map.Tile;
+import map.Level;
 import monster.Monster;
 import monster.MonsterGroup;
 import openfl.Assets;
 import flixel.util.FlxPoint;
 import character.Character;
+import map.MapGenerator;
 
 /**
  * A FlxState which can be used for the actual gameplay.
@@ -42,6 +43,15 @@ class PlayState extends FlxState
 	private var _mousePointer : FlxSprite;
 	private var _towerMoves : FlxGroup;
 	
+	private var _level : Level;
+	
+	public function new(Level : Level)
+	{
+		super();
+
+		_level = Level;
+	}
+
 	/**
 	 * Function that is called up when to state is created to set it up. 
 	 */
@@ -51,21 +61,23 @@ class PlayState extends FlxState
 		FlxG.cameras.bgColor = 0xff131c1b;
 
 		FlxG.mouse.hide();
-		
+
 		super.create();
-		
+
 		Reg.emmiters = new FlxGroup();
-		
+
 		_mousePointer = new FlxSprite(0, 0, null);
 		_mousePointer.makeGraphic(5, 5, 0x0);
 		FlxSpriteUtil.drawCircle(_mousePointer, 1, 1, 2, 0xFFFF0000);
-		
+
 		//Run soundtrack
-		FlxG.sound.playMusic("music/loop.wav", 0.7);
+		FlxG.sound.playMusic("music/loop.mp3", 0.7);
+
+		FlxG.camera.scroll.y = -Reg.HUD_HEIGHT;
 
 		//Load our tilemap and add it
 		_tilemap = new FlxTilemap();
-		_tilemap.loadMap(Assets.getText(MAP),
+		_tilemap.loadMap(_level.map,
 				TILESET,
 				TILE_WIDTH, TILE_HEIGHT, FlxTilemap.OFF,
 				0, 0);
@@ -82,8 +94,9 @@ class PlayState extends FlxState
 		_tilemap.setTileProperties(0, FlxObject.ANY, 4);
 
 		_hud = new Hud();
+		_hud.y = -Reg.HUD_HEIGHT;
 		
-		_monsters = new MonsterGroup(_hud, _tilemap); 
+		_monsters = new MonsterGroup(_hud, _tilemap, _level);
 
 		//Create the tower
 		_tower = new Character(320, 320, _monsters, _hud);
@@ -110,54 +123,54 @@ class PlayState extends FlxState
 	}
 
 	//Upgrades
-	private function checkForUpgrade()
-	{
-		if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
-		{
-			_hud.money -= _hud.priceTarget;
-			_hud.priceTarget += Std.int(_hud.priceTarget / 10);
-			_tower.target++;
-			FlxG.sound.play("sounds/upgrade.wav");
-		}
-		else if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
-		{
-			_hud.money -= _hud.priceFirerate;
-			_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
-			_tower.firerate *= 0.95;
-			FlxG.sound.play("sounds/upgrade.wav");
-		}
-		else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
-		{
-			_hud.money -= _hud.pricePower;
-			_hud.pricePower += Std.int(_hud.pricePower / 10);
-			_tower.power += 3;
-			FlxG.sound.play("sounds/upgrade.wav");
-		}
-		else if (FlxG.keyboard.justPressed("W", "Q", "E"))
-			FlxG.sound.play("sounds/error.wav");
-	}
+	//private function checkForUpgrade()
+	//{
+		//if (FlxG.keys.justPressed.E && _hud.money >= _hud.priceTarget)
+		//{
+			//_hud.money -= _hud.priceTarget;
+			//_hud.priceTarget += Std.int(_hud.priceTarget / 10);
+			//_tower.target++;
+			//FlxG.sound.play("sounds/upgrade.wav");
+		//}
+		//else if (FlxG.keys.justPressed.Q && _hud.money >= _hud.priceFirerate)
+		//{
+			//_hud.money -= _hud.priceFirerate;
+			//_hud.priceFirerate += Std.int(_hud.priceFirerate / 10);
+			//_tower.firerate *= 0.95;
+			//FlxG.sound.play("sounds/upgrade.wav");
+		//}
+		//else if (FlxG.keys.justPressed.W && _hud.money >= _hud.pricePower)
+		//{
+			//_hud.money -= _hud.pricePower;
+			//_hud.pricePower += Std.int(_hud.pricePower / 10);
+			//_tower.power += 3;
+			//FlxG.sound.play("sounds/upgrade.wav");
+		//}
+		//else if (FlxG.keyboard.justPressed("W", "Q", "E"))
+			//FlxG.sound.play("sounds/error.wav");
+	//}
 
 	//Find the nearest tile from origin
 	private function nearestTile(Origin : FlxPoint, X : Int, Y : Int) : FlxPoint
 	{
 		var closest : FlxPoint = null;
 		var tmp : FlxPoint = null;
-		
-		if (X > 0 && Tile.isGrass(_tilemap.getTile(X - 1, Y)))
+
+		if (X > 0 && MapGenerator.isGrass(_tilemap.getTile(X - 1, Y)))
 			closest = new FlxPoint((X - 1) * 16 + 8, Y * 16 + 8);
-		if (X < _tilemap.widthInTiles - 1 && Tile.isGrass(_tilemap.getTile(X + 1, Y)))
+		if (X < _tilemap.widthInTiles - 1 && MapGenerator.isGrass(_tilemap.getTile(X + 1, Y)))
 		{
 			tmp = new FlxPoint((X + 1) * 16 + 8, Y * 16 + 8);
 			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
 				closest = tmp;
 		}
-		if (Y > 0 && Tile.isGrass(_tilemap.getTile(X, Y - 1)))
+		if (Y > 0 && MapGenerator.isGrass(_tilemap.getTile(X, Y - 1)))
 		{
 			tmp = new FlxPoint(X * 16 + 8, (Y - 1) * 16 + 8);
 			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
 				closest = tmp;
 		}
-		if (Y < _tilemap.heightInTiles - 1 && Tile.isGrass(_tilemap.getTile(X, Y + 1)))
+		if (Y < _tilemap.heightInTiles - 1 && MapGenerator.isGrass(_tilemap.getTile(X, Y + 1)))
 		{
 			tmp = new FlxPoint(X * 16 + 8, (Y + 1) * 16 + 8);
 			if (closest == null || FlxMath.getDistance(tmp, Origin) < FlxMath.getDistance(closest, Origin))
@@ -167,47 +180,60 @@ class PlayState extends FlxState
 		return closest;
 	}
 	
+	private function updtateTower()
+	{
+		var p = FlxG.mouse.getWorldPosition();
+		if (p.y > 0)
+		{
+			var tile = _tilemap.getTile(Std.int(p.x / 16), Std.int(p.y / 16));
+
+			//Tower move
+			if (!MapGenerator.isGrass(tile))
+			{
+				//Find the nearest position
+				p = nearestTile(FlxG.mouse.getWorldPosition(), Std.int(p.x / 16), Std.int(p.y / 16));
+			}
+			if (p != null)
+			{
+				var new_x = p.x - p.x % 16;
+				var new_y = p.y - p.y % 16;
+				//if the tower has moved
+				if (_tower.x != new_x || _tower.y != new_y)
+				{
+		//			Looking for an object to recycle
+					var circle : Circle = null;
+					for (towerMove in _towerMoves.iterator(function(m) { return !m.visible; } ))
+					{
+						circle = cast towerMove;
+						break ;
+					}
+					if (circle == null)
+						_towerMoves.add((circle = new Circle()));
+					circle.run(_tower.x - 8, _tower.y - 8);
+					_tower.x = new_x;
+					_tower.y = new_y;
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Function that is called once every frame.
 	 */
 	override public function update():Void
 	{
 		super.update();
+
+		//if (FlxG.keys.justReleased.R)
+			//FlxG.switchState(new EndState(_level));
+		//if (FlxG.keys.justReleased.P)
+			//FlxG.paused = !FlxG.paused;
 		
 		_mousePointer.x = FlxG.mouse.x;
 		_mousePointer.y = FlxG.mouse.y;
-
-		var tile = _tilemap.getTile(Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
-
-		//Tower move
-		var p = FlxG.mouse.getWorldPosition();
-		if (!Tile.isGrass(tile))
-		{
-			//Find the nearest position
-			p = nearestTile(FlxG.mouse.getWorldPosition(), Std.int(FlxG.mouse.x / 16), Std.int(FlxG.mouse.y / 16));
-		}
-		if (p != null)
-		{
-			var new_x = p.x - p.x % 16;
-			var new_y = p.y - p.y % 16;
-			//if the tower has moved
-			if (_tower.x != new_x || _tower.y != new_y)
-			{
-	//			Looking for an object to recycle
-				var circle : Circle = null;
-				for (towerMove in _towerMoves.iterator(function(m) { return !m.visible; } ))
-				{
-					circle = cast towerMove;
-					break ;
-				}
-				if (circle == null)
-					_towerMoves.add((circle = new Circle()));
-				circle.run(_tower.x, _tower.y);
-				_tower.x = new_x;
-				_tower.y = new_y;
-			}
-		}
-
+		
+		updtateTower();
+		
 		//Every level up, increase range by one
 		if (levelup()) {
 			FlxG.sound.play("sounds/levelup.wav");
@@ -215,13 +241,13 @@ class PlayState extends FlxState
 			_tower.range++;
 		}
 		
-		checkForUpgrade();
+		//checkForUpgrade();
 		
 		//check if a monster has reach the opposite side
 		for (monster in _monsters.iterator(function(m) { return m.exists && m.alive; }))
 		{
 			if ((cast monster).x > FlxG.width - 24) {
-				FlxG.switchState(new EndState(_hud.score));
+				FlxG.switchState(new EndState(_level, _hud.score));
 			}
 		}
 

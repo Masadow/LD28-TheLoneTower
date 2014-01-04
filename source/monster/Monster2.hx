@@ -11,7 +11,7 @@ class Monster2 extends Monster
 	{		
 		maxHealth = 50;
 		reward = 50;
-		speed = 80;
+		speed = 100;
 
 		super("images/monster2.png");
 		

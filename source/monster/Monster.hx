@@ -1,6 +1,7 @@
 package monster;
 
 import flixel.effects.particles.FlxEmitter;
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup;
 import flixel.ui.FlxBar;
@@ -73,7 +74,8 @@ class Monster extends FlxSpriteGroup
 	
 	override public function update() {
 		_healthBar.angle = 0;
-		super.update();
+		if (!FlxG.paused)
+			super.update();
 	}
 	
 	override public function kill():Void 

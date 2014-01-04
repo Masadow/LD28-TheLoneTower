@@ -6,8 +6,8 @@
     <movie input="" />
     <movie path="Project.xml" />
     <movie fps="60" />
-    <movie width="608" />
-    <movie height="576" />
+    <movie width="800" />
+    <movie height="600" />
     <movie version="3" />
     <movie minorVersion="0" />
     <movie platform="NME" />
@@ -18,6 +18,7 @@
     <class path="source" />
     <class path="C:\Motion-Twin\Haxe\lib\flixel-addons\flixel-addons" />
     <class path="C:\Motion-Twin\Haxe\lib\flixel\flixel" />
+    <class path="C:\Motion-Twin\Haxe\lib\tweenx" />
     <class path="export/flash/haxe" />
   </classpaths>
   <!-- Build options -->

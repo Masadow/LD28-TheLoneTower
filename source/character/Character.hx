@@ -10,7 +10,6 @@ import monster.Monster;
 import monster.MonsterGroup;
 import flixel.util.FlxMath;
 import flixel.system.FlxSound;
-import flixel.addons.text.FlxBlinkText;
 import haxe.ds.ArraySort;
 
 /**
@@ -24,25 +23,33 @@ class Character extends FlxSpriteGroup
 	private var _rangeCircle : RangeCircle;
 	private var _structure : FlxSprite;
 	
-	private var _powerUpgrade : FlxBlinkText;
-	private var _targetUpgrade : FlxBlinkText;
-	private var _firerateUpgrade : FlxBlinkText;
+	public var firerate(get, set) : Float;
+	public var power(get, set) : Int;
+	public var target(get, set) : Int;
 	
-	public var firerate(default, set) : Float;
-	public var power(default, set) : Int;
-	public var target(default, set) : Int;
-	
+	private function get_firerate() : Float
+	{
+		return Reg.save.firerate;
+	}
 	private function set_firerate(Firerate : Float) : Float
 	{
-		return firerate = _hud.firerate = Firerate;
+		return Reg.save.firerate = Firerate;
+	}
+	private function get_power() : Int
+	{
+		return Reg.save.power;
 	}
 	private function set_power(Power : Int) : Int
 	{
-		return power = _hud.power = Power;
+		return Reg.save.power = Power;
+	}
+	private function get_target() : Int
+	{
+		return Reg.save.target;
 	}
 	private function set_target(Target : Int) : Int
 	{
-		return target = _hud.target = Target;
+		return Reg.save.target = Target;
 	}
 
 	public var level : Int;
@@ -86,24 +93,8 @@ class Character extends FlxSpriteGroup
 		_rangeCircle.range = 2;
 		add(_rangeCircle);
 		
-		power = 20;
-		firerate = 0.5; //Second between shots
 		_lastShot = 0;
-		target = 1;
-		
-		_firerateUpgrade = new FlxBlinkText(-12, -10, 12, "Q", 0.3);
-		_firerateUpgrade.visible = false;
-		_firerateUpgrade.alpha = 0.8;
-		add(_firerateUpgrade);
-		_powerUpgrade = new FlxBlinkText(2, -10, 12, "W", 0.3);
-		_powerUpgrade.visible = false;
-		_powerUpgrade.alpha = 0.8;
-		add(_powerUpgrade);
-		_targetUpgrade = new FlxBlinkText(16, -10, 12, "E", 0.3);
-		_targetUpgrade.visible = false;
-		_targetUpgrade.alpha = 0.8;
-		add(_targetUpgrade);
-		
+
 	}
 	
 	static var t : Int = 0;
@@ -114,11 +105,6 @@ class Character extends FlxSpriteGroup
 		
 		_rangeCircle.x = _structure.x - _rangeCircle.range * 16;
 		_rangeCircle.y = _structure.y - _rangeCircle.range * 16;
-		
-		//Upgrade UI
-		//_firerateUpgrade.visible = _hud.money > _hud.priceFirerate;
-		//_powerUpgrade.visible = _hud.money > _hud.pricePower;
-		//_powerUpgrade.visible = _hud.money > _hud.priceTarget;
 		
 		//Remove dead missiles
 		var removeList: List<FlxBasic> = new List<FlxBasic>();
@@ -166,7 +152,6 @@ class Character extends FlxSpriteGroup
 				//Fire a missile
 				Reg.emmiters.add(new Missile(_structure.x + 8, _structure.y + 8, monster.getMidpoint())); 
 				
-				FlxG.sound.play("sounds/shoot.wav");
 				monster.hurt(power);
 				if (!monster.alive) {
 					//Kill monster, claim reward
@@ -178,6 +163,8 @@ class Character extends FlxSpriteGroup
 				if (--maxTarget == 0)
 					break ;
 			}
+			if (_lastShot == 0)
+				FlxG.sound.play("sounds/shoot.wav", 0.5);
 		}
 		
 	}

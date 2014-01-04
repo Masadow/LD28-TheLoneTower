@@ -6,6 +6,7 @@
 -cp source
 -cp C:\Motion-Twin\Haxe\lib\flixel-addons\flixel-addons
 -cp C:\Motion-Twin\Haxe\lib\flixel\flixel
+-cp C:\Motion-Twin\Haxe\lib\tweenx
 -D nme4=1
 -D tools=1
 -D FLX_NO_DEBUG
@@ -17,7 +18,7 @@
 --no-output
 -swf-version 11.6
 -swf export/flash/bin/lonetower.swf
--swf-header 608:576:60:FFFFFF
+-swf-header 800:600:60:FFFFFF
 -cp export/flash/haxe
 #--remap nme:flash
 

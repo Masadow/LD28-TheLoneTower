@@ -7,6 +7,10 @@ import flixel.ui.FlxButton;
 import flixel.text.FlxText;
 import flixel.FlxG;
 import flixel.util.FlxColor;
+import tweenx909.rule.BoolRuleX;
+import tweenx909.TweenX;
+import tweenx909.EaseX;
+import tweenx909.ChainX;
 
 /**
  * ...
@@ -15,35 +19,37 @@ import flixel.util.FlxColor;
 class Hud extends FlxSpriteGroup
 {
 
-	public var money(default, set) : Int;
+	public var money(get, set) : Int;
 	public var score(default, set) : Int;
 	public var nextLevel(default, set) : Int;
-	public var upgrade(default, set) : Int;
-	public var target(default, set) : Int;
-	public var firerate(default, set) : Float;
-	public var power(default, set) : Int;
-	public var priceTarget : Int;
-	public var priceFirerate : Int;
-	public var pricePower : Int;
 
 	private var _score: FlxText;
 	private var _money: FlxText;
 	private var _nextLevel: FlxText;
-	private var _upgrade: FlxText;
-	private var _target : FlxText;
-	private var _power : FlxText;
-	private var _firerate : FlxText;
+	private var _lastScoreNotif : Int;
+	private var _scoreNotif : FlxText;
 
 	private function set_score(Score : Int) : Int {
 		score = Score;
 		_score.text = "Score: " + score;
+		if (score > _lastScoreNotif + 1000)
+		{
+			_lastScoreNotif += 1000;
+			_scoreNotif.text = _lastScoreNotif + " PTS";
+			_scoreNotif.alpha = 1;
+		}
 		return score;
 	}
 
-	private function set_money(Money: Int) : Int{
-		money = Money;
-		_money.text = "Money: " + money + "$";
-		return money;
+	private function get_money() : Int
+	{
+		return Reg.save.money;
+	}
+	private function set_money(Money: Int) : Int
+	{
+		Reg.save.money = Money;
+		_money.text = "Money: " + Money + "$";
+		return Money;
 	}
 	
 	private function set_nextLevel(NextLevel : Int) : Int
@@ -51,34 +57,6 @@ class Hud extends FlxSpriteGroup
 		nextLevel = NextLevel;
 		_nextLevel.text = "Next level: " + nextLevel;
 		return nextLevel;
-	}
-
-	private function set_upgrade(Upgrade : Int) : Int
-	{
-		upgrade = Upgrade;
-		_upgrade.text = "Upgrade points: " + upgrade;
-		return upgrade;
-	}
-	
-	private function set_power(Power : Int) : Int
-	{
-		power = Power;
-		_power.text = "Power (W for "+ pricePower +"$): " + power;
-		return power;
-	}
-
-	private function set_firerate(Firerate : Float) : Float
-	{
-		firerate = Firerate;
-		_firerate.text = "Firerate (Q for "+ priceFirerate +"$): " + Math.round((1 / firerate) * 10) / 10;
-		return firerate;
-	}
-
-	private function set_target(Target : Int) : Int
-	{
-		target = Target;
-		_target.text = "Targets (E for " + priceTarget +"$): " + target;
-		return target;
 	}
 
 	public function new() 
@@ -91,74 +69,29 @@ class Hud extends FlxSpriteGroup
 
 		//Create texts
 		_money = new FlxText(0, 0, 120, "", 11);
-		_money.scrollFactor.set(0, 0);
 		add(_money);
 		_score = new FlxText(120, 0, 120, "", 11);
-		_score.scrollFactor.set(0, 0);
 		add(_score);
 		_nextLevel = new FlxText(240, 0, 120, "", 11);
-		_nextLevel.scrollFactor.set(0, 0);
 		add(_nextLevel);
-		_upgrade = new FlxText(360, 0, 120, "", 11);
-		_upgrade.scrollFactor.set(0, 0);
-//		add(_upgrade);
-		_firerate = new FlxText(0, FlxG.height - 20, 200, "", 12);
-		_firerate.scrollFactor.set(0, 0);
-		add(_firerate);
-		_power = new FlxText(200, FlxG.height - 20, 200, "", 12);
-		_power.scrollFactor.set(0, 0);
-		add(_power);
-		_target = new FlxText(400, FlxG.height - 20, 200, "", 12);
-		_target.scrollFactor.set(0, 0);
-		add(_target);
-		
-		var txt = new FlxText(240, 20, 120, "Mute with M", 11);
+		var txt = new FlxText(0, 20, 300, "Mute: Music with M / Sound with S", 11);
 		add(txt);
+
+		_scoreNotif = new FlxText(0, 150, FlxG.width, "", 20);
+		_scoreNotif.alignment = "center";
+		add(_scoreNotif);
 		
-		money = 0;
+		money = Reg.save.money;
 		score = 0;
-		upgrade = 0;
-		pricePower = 200;
-		priceFirerate = 300;
-		priceTarget = 1000;
+		_lastScoreNotif = 0;
+
 	}
 
-	private static function switchColor(o : FlxFlicker)
-	{
-		var txt : FlxText = cast o.object;
-		txt.visible = true;
-		txt.color = txt.color == 0xFFFFFF ? 0x005500 : 0xFFFFFF;
-	}
-	
 	override public function update():Void 
 	{
 		super.update();
-
-		if (money > priceFirerate && !FlxFlicker.isFlickering(_firerate))
-		{
-			FlxFlicker.flicker(_firerate, 0, 0.5, false, false, null, Hud.switchColor);
-		}
-		else if (money < priceFirerate && FlxFlicker.isFlickering(_firerate))
-		{
-			FlxFlicker.stopFlickering(_firerate);
-		}
-
-		if (money > pricePower && !FlxFlicker.isFlickering(_power))
-		{
-			FlxFlicker.flicker(_power, 0, 0.5, false, false, null, Hud.switchColor);
-		}
-		else if (money < pricePower && FlxFlicker.isFlickering(_power))
-		{
-			FlxFlicker.stopFlickering(_power);
-		}
-
-		if (money > priceTarget && !FlxFlicker.isFlickering(_target))
-		{
-			FlxFlicker.flicker(_target, 0, 0.5, false, false, null, Hud.switchColor);
-		}
-		else if (money < priceTarget && FlxFlicker.isFlickering(_target))
-		{
-			FlxFlicker.stopFlickering(_target);
-		}
+		
+		if (_scoreNotif.alpha > 0)
+			_scoreNotif.alpha -= FlxG.elapsed / (_scoreNotif.alpha * 3);
 	}
 }

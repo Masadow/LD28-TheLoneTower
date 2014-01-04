@@ -15,7 +15,7 @@ class Main extends Sprite
 {
 	// Entry point
 	static public function main():Void
-	{	
+	{
 		Lib.current.addChild(new Main());
 	}
 	

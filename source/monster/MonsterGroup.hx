@@ -6,6 +6,7 @@ import flixel.util.FlxMath;
 import flixel.util.FlxPoint;
 import flixel.util.FlxPath;
 import flixel.util.FlxRandom;
+import map.Level;
 
 /**
  * ...
@@ -15,20 +16,17 @@ class MonsterGroup extends FlxGroup
 {
 	private var _hud : Hud;
 	private var _tilemap : FlxTilemap;
-	private var entriesY : Array<Int>;
-	private var exitY : Array<Int>;
 	private var _nextSpawn : Float;
 	private var _elapsed : Float;
+	private var _level : Level;
 
-	public function new(hud : Hud, Tilemap : FlxTilemap)
+	public function new(hud : Hud, Tilemap : FlxTilemap, Level : Level)
 	{
 		super();
 		
-		entriesY = [1, 7, 11, 20, 24];
-		exitY = [0, 5, 7, 9, 14, 16, 25, 27, 29, 31, 33];
-		
 		_hud = hud;
 		_tilemap = Tilemap;
+		_level = Level;
 		
 		_nextSpawn = f(_hud.score);
 		_elapsed = 5; //Force spawn at the beginning
@@ -56,8 +54,11 @@ class MonsterGroup extends FlxGroup
 		super.update();
 
 		_nextSpawn = f(_hud.score);
+		
+		if (FlxG.paused)
+			return ;
 
-		for (entry in entriesY) {
+		for (entry in _level.entriesY) {
 			//Do we spawn a monster ?
 			_elapsed += FlxG.elapsed;
 			if (_elapsed >= _nextSpawn) {
@@ -69,21 +70,25 @@ class MonsterGroup extends FlxGroup
 					case 1: monster = getMonster(Monster2);
 					case 2: monster = getMonster(Monster3);
 				}
-				//Pick an entry at random
-				var entry = entriesY[FlxRandom.intRanged(0, entriesY.length - 1)];
-				monster.y = entry * 16;
-				
-				//Pick an exit at random
-				var exit = exitY[FlxRandom.intRanged(0, exitY.length - 1)];
-								
-				//Set the path for the monster
-				var entryY = entry * 16 + 8;
-				var exitY = exit * 16 + 8;
-				
-				var points = _tilemap.findPath(new FlxPoint(8, entryY), new FlxPoint(FlxG.width - 8, exitY));
-				if (points != null && !FlxG.paused) {
-					var path : FlxPath = FlxPath.recycle();
+				var points : Array<FlxPoint> = null;
+				while (points == null)
+				{
+					//Pick an entry at random
+					var entry = _level.entriesY[FlxRandom.intRanged(0, _level.entriesY.length - 1)];
+					monster.y = entry * 16;
 					
+					//Pick an exit at random
+					var exit = _level.exitY[FlxRandom.intRanged(0, _level.exitY.length - 1)];
+									
+					//Set the path for the monster
+					var entryY = entry * 16 + 8;
+					var exitY = exit * 16 + 8;
+
+					points = _tilemap.findPath(new FlxPoint(8, entryY), new FlxPoint(FlxG.width - 8, exitY));
+				}
+				if (!FlxG.paused) {
+					var path : FlxPath = FlxPath.recycle();
+
 					path.run(monster, points, monster.speed, 0, true);
 				}
 				
@@ -97,7 +102,7 @@ class MonsterGroup extends FlxGroup
 	private function f(Score : Int) : Float {
 //		Spawning rate (second per)
 		var fscore = Score / 100000;
-		fscore = 7 - (fscore * fscore + fscore * Math.sin(Score));
+		fscore = 6 - (fscore * fscore + fscore * Math.sin(Score));
 		return fscore > 1 ? fscore : 1;
 	}
 	

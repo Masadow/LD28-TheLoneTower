@@ -11,7 +11,7 @@ class Monster3 extends Monster
 	{
 		maxHealth = 200;
 		reward = 200;
-		speed = 20;
+		speed = 50;
 		
 		_modifier = 1.7;
 

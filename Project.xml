@@ -2,8 +2,8 @@
 <project>
 	<app title="LD48: The lone tower" file="lonetower" main="Main" version="0.0.1" company="HaxeFlixel" />
 	
-	<window width="608" height="576" fps="60" orientation="portrait" resizable="true" if="web" />
-	<window width="608" height="576" fps="60" orientation="landscape" fullscreen="false" hardware="true" vsync="true" unless="web" />
+	<window width="800" height="600" fps="60" orientation="portrait" resizable="true" if="web" />
+	<window width="800" height="600" fps="60" orientation="landscape" fullscreen="false" hardware="true" vsync="true" unless="web" />
 	
 	<!--The flixel preloader gets stuck in Chrome, so it's disabled by default for now. 
 	Safe to use if you embed the swf into a html file!-->
@@ -16,13 +16,18 @@
 	<classpath name="source" />
 	<classpath name="C:\Motion-Twin\Haxe\lib\flixel-addons\flixel-addons" />
 	<classpath name="C:\Motion-Twin\Haxe\lib\flixel\flixel" />
+	<classpath name="C:\Motion-Twin\Haxe\lib\tweenx" />
 	
 	<!--You can use rename="newName" to shorten the paths to the individual subdirectories!-->
 	<assets path="assets" />
+
 	<assets path="assets/images" rename="images" include="*.jpg|*.png" />
+
 	<assets path="assets/data" rename="data" include="*.csv" />
+
 	<assets path="assets/sounds" rename="sounds" include="*.wav" />
-	<assets path="assets/music" rename="music" include="*.wav" />
+
+	<assets path="assets/music" rename="music" include="*.wav|*.mp3|*.ogg" />
 
 	<haxelib name="openfl" />
 	<haxelib name="flixel"/>
@@ -65,4 +70,6 @@
 	
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
+	
+	<!--<haxedef name="tweenx_debug" />-->
 </project>
