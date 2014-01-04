@@ -8,14 +8,14 @@ import flash.Lib;
 import flixel.FlxGame;
 
 /**
- * Copyright 2013 - 2014 Jimmy Delas
+ * 
  * @author Masadow
  */
 class Main extends Sprite 
 {
 	// Entry point
 	static public function main():Void
-	{	
+	{
 		Lib.current.addChild(new Main());
 	}
 	

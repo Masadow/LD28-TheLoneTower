@@ -2,9 +2,6 @@ package;
 
 import flash.Lib;
 import flixel.FlxGame;
-import states.PlayState;
-import states.EndState;
-import states.PreState;
 
 class GameClass extends FlxGame
 {	
@@ -13,12 +10,12 @@ class GameClass extends FlxGame
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 		
-		var ratioX:Float = stageWidth / 608;
-		var ratioY:Float = stageHeight / 576;
+		var ratioX:Float = stageWidth / 800;
+		var ratioY:Float = stageHeight / 600;
 		var ratio:Float = Math.min(ratioX, ratioY);
 		
 		var fps:Int = 60;
 		
-		super(Math.ceil(stageWidth / ratio), Math.ceil(stageHeight / ratio), PreState, ratio, fps, fps);
+		super(Math.ceil(stageWidth / ratio), Math.ceil(stageHeight / ratio), ScreenState, ratio, fps, fps);
 	}
 }
